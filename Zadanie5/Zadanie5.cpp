@@ -1,8 +1,7 @@
-﻿// Zadanie5.cpp : Ilona Topol, D3
-//
-
-#define _CRT_SECURE_NO_WARNINGS
+﻿#define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
+#include<stdio.h>
+#include <limits>
 
 using namespace std;
 
@@ -29,7 +28,6 @@ struct DIB_header {
     unsigned int colorImportant;
 
 }dib_header;
-
 
 int main(int argc, char* argv[])
 {
@@ -74,7 +72,39 @@ int main(int argc, char* argv[])
         cout << "Liczba kolorow w palecie: " << dib_header.colorUsed << "\n";
         cout << "Liczba waznych kolorow w palecie: " << dib_header.colorImportant << "\n";
 
-        fclose(f);
+        FILE* n = fopen("negatyw.bmp", "wb");
+        if (nullptr == n) {
+            cout << endl << endl << "Problem z otwarciem pliku" << endl;
+        }
+        else {
+            cout << endl << endl << "Tworze negatyw obrazku, prosze o cirpliwosc..." << endl;
+
+            fwrite(&bmp_header.name[0], 1, 1, n);
+            fwrite(&bmp_header.name[1], 1, 1, n);
+            fwrite(&bmp_header.size, sizeof(bmp_header.size), 1, n);
+            fwrite(&bmp_header.reserved_1, sizeof(bmp_header.reserved_1), 1, n);
+            fwrite(&bmp_header.reserved_2, sizeof(bmp_header.reserved_2), 1, n);
+            fwrite(&bmp_header.offset, sizeof(bmp_header.offset), 1, n);
+
+            fwrite(&dib_header, sizeof(struct DIB_header), 1, n);
+
+            int bmpImg;
+            for (int i = bmp_header.offset; i < bmp_header.size; i++)
+            {
+                fseek(f, i, SEEK_SET);
+                fseek(n, i, SEEK_SET);
+                fread(&bmpImg, 3, 1, f);
+                bmpImg = INT_MAX - bmpImg;
+                fwrite(&bmpImg, 3, 1, n);
+            }
+
+            cout << "Utworzono negatyw.";
+
+            fclose(f);
+            fclose(n);
+        }
+
     }
-   return 0;
+
+    return 0;
 }
